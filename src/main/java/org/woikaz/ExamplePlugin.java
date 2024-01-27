@@ -2,10 +2,10 @@ package org.woikaz;
 
 import com.google.inject.Provides;
 import javax.inject.Inject;
+import javax.swing.*;
+
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
+import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuOptionClicked;
@@ -18,12 +18,11 @@ import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
+import org.woikaz.localstorage.InventoryItem;
 import org.woikaz.ui.DropLogPanel;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @PluginDescriptor(
@@ -50,11 +49,13 @@ public class ExamplePlugin extends Plugin
 
 	private NavigationButton navButton;
 
+	private List<InventoryItem> initialInventory = new ArrayList<InventoryItem>();
+
 	@Override
 	protected void startUp() throws Exception
 	{
 		log.info("Example started!");
-		panel = new DropLogPanel(itemManager, this);
+		panel = new DropLogPanel(this);
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/woikaz/droplog/delete-white.png");
 		navButton = NavigationButton.builder()
 				.tooltip("Drop Log")
@@ -75,7 +76,7 @@ public class ExamplePlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
+		clientToolbar.removeNavigation(navButton);
 	}
 
 	@Subscribe
@@ -95,15 +96,28 @@ public class ExamplePlugin extends Plugin
 		{
 			return;
 		}
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + event.getItemId(), null);
-		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "client inv 0  " + client.getItemContainer(0), null);
-		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "client inv?  " + client.getItemContainer(event.getParam0()), null);
-		// client.getItemContainer(event.getParam0());
+		Optional<InventoryItem> foundItem = initialInventory.stream()
+				.filter(item -> item.getId() == event.getItemId())
+				.findFirst();
+		if (foundItem.isPresent()) {
+			InventoryItem item = foundItem.get();
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + item.getId() + " Item name: " + item.getName() + " Item quantity: " + item.getQuantity(), "");
+			// SwingUtilities.invokeLater(() -> panel.droppedItem(item));
+		}
 	}
 
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
+		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
+			return;
+		}
+		for (Item item : event.getItemContainer().getItems()) {
+			InventoryItem invItem = new InventoryItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName());
+			initialInventory.add(invItem);
+		}
+
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", event.getItemContainer().getItem(0).getQuantity() + "", null);
 		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + event.getContainerId() + Arrays.toString(event.getItemContainer().getItems()), null);
 		// log.info(Arrays.toString(event.getItemContainer().getItems()));
 	}
