@@ -1,11 +1,10 @@
 package org.woikaz.ui;
 
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
 import org.woikaz.ExamplePlugin;
-import org.woikaz.localstorage.CachedItem;
+import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,6 +28,9 @@ public class DropLogPanel  extends PluginPanel {
     private boolean ascendingOrder = false;
 
     private ArrayList<DropLogTableRow> rows = new ArrayList<>();
+    private List<DropLogTableRow> allRows = new ArrayList<>(); // For all items loaded from the file
+    private List<DropLogTableRow> sessionRows = new ArrayList<>(); // For items dropped in the current session
+    private boolean showingAllItems = true;
 
     public DropLogPanel(ExamplePlugin plugin) {
         this.plugin = plugin;
@@ -39,6 +41,21 @@ public class DropLogPanel  extends PluginPanel {
         JPanel headerContainer = buildHeader();
 
         listContainer.setLayout(new GridLayout(0, 1));
+
+        JPanel controlPanel = new JPanel(new BorderLayout());
+        JButton toggleButton = new JButton("Show Current Session");
+        toggleButton.addActionListener(e -> {
+            toggleViewMode();
+            if (showingAllItems) {
+                toggleButton.setText("Show Current Session");
+            } else {
+                toggleButton.setText("Show All Time");
+            }
+        });
+
+        controlPanel.add(toggleButton, BorderLayout.CENTER);
+
+        add(controlPanel, BorderLayout.NORTH);
 
         add(headerContainer);
         add(listContainer);
@@ -161,54 +178,40 @@ public class DropLogPanel  extends PluginPanel {
         listContainer.repaint();
     }
 
-    void populate(List<CachedItem> items)
-    {
-        rows.clear();
+    public void droppedItem(DroppedItem item) {
+        updateListWithItem(sessionRows, item);
 
-        for (int i = 0; i < items.size(); i++)
-        {
-            CachedItem item = items.get(i);
+        updateListWithItem(allRows, item);
 
-            rows.add(buildRow(item, i % 2 == 0));
-        }
+        // Decide which list to display based on the current mode
+        rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
 
         updateList();
     }
 
-    public void droppedItem(CachedItem item) {
-        boolean itemExists = false;
-        for (DropLogTableRow row : rows) {
+    private boolean updateListWithItem(List<DropLogTableRow> listToUpdate, DroppedItem item) {
+        for (DropLogTableRow row : listToUpdate) {
             if (row.getItemName().equals(item.getName())) {
-                // Update quantity
                 row.setQuantity(row.getItemCount() + item.getQuantity());
-                itemExists = true;
-                break;
+                return true; // Item was found and updated
             }
         }
-
-        if (!itemExists) {
-            // Add new row
-            DropLogTableRow newRow = new DropLogTableRow(this, item);
-            rows.add(newRow);
-        }
-
-        updateList();
+        DropLogTableRow newRow = buildRow(item, listToUpdate.size() % 2 == 0);
+        listToUpdate.add(newRow);
+        return false; // A new item was added
     }
 
     public void removeRow(DropLogTableRow row) {
-        // Remove the row from the data structure
         rows.remove(row);
 
-        // Remove the row from the UI
         listContainer.remove(row);
 
-        // Update the UI
         listContainer.revalidate();
         listContainer.repaint();
     }
 
 
-    private DropLogTableRow buildRow(CachedItem item, boolean stripe)
+    private DropLogTableRow buildRow(DroppedItem item, boolean stripe)
     {
         DropLogTableRow row = new DropLogTableRow(this, item);
         row.setBackground(stripe ? ODD_ROW : ColorScheme.DARK_GRAY_COLOR);
@@ -221,4 +224,28 @@ public class DropLogPanel  extends PluginPanel {
         VALUE,
         NAME
     }
+
+    private void toggleViewMode() {
+        showingAllItems = !showingAllItems;
+        if (showingAllItems) {
+            rows = new ArrayList<>(allRows);
+        } else {
+            rows = new ArrayList<>(sessionRows);
+        }
+        updateList();
+    }
+
+    public void populateAllRows(List<DroppedItem> loadedItems) {
+        allRows.clear();
+        for (DroppedItem item : loadedItems) {
+            allRows.add(buildRow(item, allRows.size() % 2 == 0));
+        }
+
+        // Update the display based on the current view mode
+        rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
+        updateList();
+    }
+
+
+
 }
