@@ -1,11 +1,10 @@
 package org.woikaz.ui;
 
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
 import org.woikaz.ExamplePlugin;
-import org.woikaz.localstorage.CachedItem;
+import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -161,13 +160,13 @@ public class DropLogPanel  extends PluginPanel {
         listContainer.repaint();
     }
 
-    void populate(List<CachedItem> items)
+    void populate(List<DroppedItem> items)
     {
         rows.clear();
 
         for (int i = 0; i < items.size(); i++)
         {
-            CachedItem item = items.get(i);
+            DroppedItem item = items.get(i);
 
             rows.add(buildRow(item, i % 2 == 0));
         }
@@ -175,7 +174,7 @@ public class DropLogPanel  extends PluginPanel {
         updateList();
     }
 
-    public void droppedItem(CachedItem item) {
+    public void droppedItem(DroppedItem item) {
         boolean itemExists = false;
         for (DropLogTableRow row : rows) {
             if (row.getItemName().equals(item.getName())) {
@@ -208,7 +207,7 @@ public class DropLogPanel  extends PluginPanel {
     }
 
 
-    private DropLogTableRow buildRow(CachedItem item, boolean stripe)
+    private DropLogTableRow buildRow(DroppedItem item, boolean stripe)
     {
         DropLogTableRow row = new DropLogTableRow(this, item);
         row.setBackground(stripe ? ODD_ROW : ColorScheme.DARK_GRAY_COLOR);

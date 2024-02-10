@@ -18,7 +18,8 @@ import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
-import org.woikaz.localstorage.CachedItem;
+import org.woikaz.localstorage.DropDataStorage;
+import org.woikaz.localstorage.DroppedItem;
 import org.woikaz.ui.DropLogPanel;
 
 import java.awt.image.BufferedImage;
@@ -49,7 +50,7 @@ public class ExamplePlugin extends Plugin
 
 	private NavigationButton navButton;
 
-	private List<CachedItem> initialInventory = new ArrayList<CachedItem>();
+	private List<DroppedItem> initialInventory = new ArrayList<DroppedItem>();
 
 	@Override
 	protected void startUp() throws Exception
@@ -65,6 +66,7 @@ public class ExamplePlugin extends Plugin
 				.build();
 
 		clientToolbar.addNavigation(navButton);
+		List<DroppedItem> loadedItems = new DropDataStorage().loadAllItems();
 
 		final Optional<Plugin> mainPlugin = pluginManager.getPlugins().stream().filter(p -> p.getName().equals("Drop Log")).findFirst();
 		if (mainPlugin.isPresent() && !pluginManager.isPluginEnabled(mainPlugin.get()))
@@ -96,14 +98,15 @@ public class ExamplePlugin extends Plugin
 		{
 			return;
 		}
-		Optional<CachedItem> foundItem = initialInventory.stream()
+		Optional<DroppedItem> foundItem = initialInventory.stream()
 				.filter(item -> item.getId() == event.getItemId())
 				.findFirst();
 		if (foundItem.isPresent()) {
-			CachedItem item = foundItem.get();
+			DroppedItem item = foundItem.get();
 			// item.setId(itemManager.canonicalize(foundItem.get().getId()));
 			// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + item.getId() + " Item name: " + item.getName() + " Item quantity: " + item.getQuantity(), "");
 			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
+			new DropDataStorage().saveItem(item);
 		}
 	}
 
@@ -116,7 +119,7 @@ public class ExamplePlugin extends Plugin
 		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "ContainerId: " + event.getContainerId() + " Inv id: " + InventoryID.INVENTORY.getId(), null);
 		initialInventory.clear();
 		for (Item item : event.getItemContainer().getItems()) {
-			CachedItem invItem = new CachedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
+			DroppedItem invItem = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
 			initialInventory.add(invItem);
 		}
 

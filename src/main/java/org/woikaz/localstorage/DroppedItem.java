@@ -2,11 +2,10 @@ package org.woikaz.localstorage;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Value;
 
 @Data
 @AllArgsConstructor
-public class CachedItem
+public class DroppedItem
 {
     int id;
     int quantity;

@@ -3,7 +3,7 @@ package org.woikaz.ui;
 import lombok.Getter;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.QuantityFormatter;
-import org.woikaz.localstorage.CachedItem;
+import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -28,13 +28,13 @@ public class DropLogTableRow extends JPanel {
     private JLabel value;
 
     @Getter
-    private final CachedItem item;
+    private final DroppedItem item;
 
     private DropLogPanel parentPanel;
 
     private Color lastBackground;
 
-    DropLogTableRow(DropLogPanel parentPanel, CachedItem item)
+    DropLogTableRow(DropLogPanel parentPanel, DroppedItem item)
     {
         this.parentPanel = parentPanel;
         this.item = item;
