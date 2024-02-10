@@ -188,17 +188,29 @@ public class DropLogPanel  extends PluginPanel {
 
         if (!itemExists) {
             // Add new row
-            DropLogTableRow newRow = new DropLogTableRow(item);
+            DropLogTableRow newRow = new DropLogTableRow(this, item);
             rows.add(newRow);
         }
 
         updateList();
     }
 
+    public void removeRow(DropLogTableRow row) {
+        // Remove the row from the data structure
+        rows.remove(row);
+
+        // Remove the row from the UI
+        listContainer.remove(row);
+
+        // Update the UI
+        listContainer.revalidate();
+        listContainer.repaint();
+    }
+
 
     private DropLogTableRow buildRow(CachedItem item, boolean stripe)
     {
-        DropLogTableRow row = new DropLogTableRow(item);
+        DropLogTableRow row = new DropLogTableRow(this, item);
         row.setBackground(stripe ? ODD_ROW : ColorScheme.DARK_GRAY_COLOR);
         return row;
     }

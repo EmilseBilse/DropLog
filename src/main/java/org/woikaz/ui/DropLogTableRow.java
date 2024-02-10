@@ -30,41 +30,61 @@ public class DropLogTableRow extends JPanel {
     @Getter
     private final CachedItem item;
 
+    private DropLogPanel parentPanel;
+
     private Color lastBackground;
 
-    DropLogTableRow(CachedItem item)
+    DropLogTableRow(DropLogPanel parentPanel, CachedItem item)
     {
+        this.parentPanel = parentPanel;
         this.item = item;
 
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(2, 0, 2, 0));
 
+        // Create the popup menu and its items
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        JMenuItem removeXItem = new JMenuItem("Remove X");
+
+        // Add action listeners to menu items (example for deleteItem)
+        deleteItem.addActionListener(e -> {
+            parentPanel.removeRow(DropLogTableRow.this);
+        });
+
+        // Add action listeners to menu items (example for removeXItem)
+        removeXItem.addActionListener(e -> {
+            // Your code to edit the item
+            System.out.println("Edit action triggered for " + this.item.getName());
+        });
+
+        // Add items to the popup menu
+        popupMenu.add(deleteItem);
+        popupMenu.add(removeXItem);
+
         addMouseListener(new MouseAdapter()
         {
-            @Override
+            /*@Override
             public void mouseClicked(MouseEvent mouseEvent)
             {
-                if (mouseEvent.getClickCount() == 2)
+                if (mouseEvent.getButton() == 3)
                 {
+                    System.out.println(item.getName());
+                    System.out.println("right clicked");
+                }
+            }*/
 
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) { // Check if the event is the popup menu trigger event
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
 
             @Override
-            public void mousePressed(MouseEvent mouseEvent)
-            {
-                if (mouseEvent.getClickCount() == 2)
-                {
-                    setBackground(getBackground().brighter());
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent mouseEvent)
-            {
-                if (mouseEvent.getClickCount() == 2)
-                {
-                    setBackground(getBackground().darker());
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) { // Check if the event is the popup menu trigger event
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
 

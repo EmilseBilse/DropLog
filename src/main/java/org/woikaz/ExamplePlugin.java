@@ -102,7 +102,7 @@ public class ExamplePlugin extends Plugin
 		if (foundItem.isPresent()) {
 			CachedItem item = foundItem.get();
 			// item.setId(itemManager.canonicalize(foundItem.get().getId()));
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + item.getId() + " Item name: " + item.getName() + " Item quantity: " + item.getQuantity(), "");
+			// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + item.getId() + " Item name: " + item.getName() + " Item quantity: " + item.getQuantity(), "");
 			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
 		}
 	}
