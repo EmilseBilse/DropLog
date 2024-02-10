@@ -30,7 +30,7 @@ public class DropLogPanel  extends PluginPanel {
     private ArrayList<DropLogTableRow> rows = new ArrayList<>();
     private List<DropLogTableRow> allRows = new ArrayList<>(); // For all items loaded from the file
     private List<DropLogTableRow> sessionRows = new ArrayList<>(); // For items dropped in the current session
-    private boolean showingAllItems = true; // Toggle state
+    private boolean showingAllItems = true;
 
     public DropLogPanel(ExamplePlugin plugin) {
         this.plugin = plugin;
@@ -42,7 +42,6 @@ public class DropLogPanel  extends PluginPanel {
 
         listContainer.setLayout(new GridLayout(0, 1));
 
-        // Create a new panel for controls
         JPanel controlPanel = new JPanel(new BorderLayout());
         JButton toggleButton = new JButton("Show Current Session");
         toggleButton.addActionListener(e -> {
@@ -54,12 +53,9 @@ public class DropLogPanel  extends PluginPanel {
             }
         });
 
-        // Add the toggle button to the control panel
         controlPanel.add(toggleButton, BorderLayout.CENTER);
 
-        // Now, add the control panel to your DropLogPanel layout
-        // Assuming your layout allows adding at the top or as per your design
-        add(controlPanel, BorderLayout.NORTH); // Adjust layout as per your panel setup
+        add(controlPanel, BorderLayout.NORTH);
 
         add(headerContainer);
         add(listContainer);
@@ -182,69 +178,34 @@ public class DropLogPanel  extends PluginPanel {
         listContainer.repaint();
     }
 
-    /*void populate(List<DroppedItem> items)
-    {
-        rows.clear();
-
-        for (int i = 0; i < items.size(); i++)
-        {
-            DroppedItem item = items.get(i);
-
-            rows.add(buildRow(item, i % 2 == 0));
-        }
-
-        updateList();
-    }*/
-
     public void droppedItem(DroppedItem item) {
-        // Update sessionRows, adding the item or updating its quantity
         updateListWithItem(sessionRows, item);
 
-        // Do the same for allRows
         updateListWithItem(allRows, item);
 
         // Decide which list to display based on the current mode
         rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
 
-        updateList(); // Refresh the view
+        updateList();
     }
 
     private boolean updateListWithItem(List<DropLogTableRow> listToUpdate, DroppedItem item) {
         for (DropLogTableRow row : listToUpdate) {
             if (row.getItemName().equals(item.getName())) {
-                // Item exists, update its quantity
                 row.setQuantity(row.getItemCount() + item.getQuantity());
                 return true; // Item was found and updated
             }
         }
-        // Item does not exist, add a new row
         DropLogTableRow newRow = buildRow(item, listToUpdate.size() % 2 == 0);
         listToUpdate.add(newRow);
         return false; // A new item was added
     }
 
-    public void populate(List<DroppedItem> items) {
-        // Assuming this method populates from the .json file at startup
-        allRows.clear();
-        for (DroppedItem item : items) {
-            allRows.add(buildRow(item, allRows.size() % 2 == 0));
-        }
-        if (showingAllItems) {
-            rows = new ArrayList<>(allRows);
-        } else {
-            rows = new ArrayList<>(sessionRows); // Just in case populate is called after toggling
-        }
-        updateList();
-    }
-
     public void removeRow(DropLogTableRow row) {
-        // Remove the row from the data structure
         rows.remove(row);
 
-        // Remove the row from the UI
         listContainer.remove(row);
 
-        // Update the UI
         listContainer.revalidate();
         listContainer.repaint();
     }
@@ -265,20 +226,18 @@ public class DropLogPanel  extends PluginPanel {
     }
 
     private void toggleViewMode() {
-        showingAllItems = !showingAllItems; // Toggle the state
+        showingAllItems = !showingAllItems;
         if (showingAllItems) {
-            rows = new ArrayList<>(allRows); // Switch to all items
+            rows = new ArrayList<>(allRows);
         } else {
-            rows = new ArrayList<>(sessionRows); // Switch to session items
+            rows = new ArrayList<>(sessionRows);
         }
-        updateList(); // Refresh the view
+        updateList();
     }
 
     public void populateAllRows(List<DroppedItem> loadedItems) {
         allRows.clear();
         for (DroppedItem item : loadedItems) {
-            // This adds rows directly to allRows without checking for duplicates
-            // Since we're loading these from storage, we assume they're unique here
             allRows.add(buildRow(item, allRows.size() % 2 == 0));
         }
 

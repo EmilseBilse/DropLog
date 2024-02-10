@@ -15,7 +15,6 @@ public class DropDataStorage {
     public void saveItem(DroppedItem item) {
         List<DroppedItem> items = loadAllItems(); // Load all items
 
-        // Find if the item already exists based on its name
         Optional<DroppedItem> existingItemOpt = items.stream()
                 .filter(i -> i.getName().equals(item.getName()))
                 .findFirst();
@@ -26,7 +25,6 @@ public class DropDataStorage {
             int newQuantity = existingItem.getQuantity() + item.getQuantity();
             existingItem.setQuantity(newQuantity);
         } else {
-            // If the item does not exist, add it to the list
             items.add(item);
         }
 
@@ -34,7 +32,7 @@ public class DropDataStorage {
         try (Writer writer = new FileWriter(FILE_PATH)) {
             gson.toJson(items, writer);
         } catch (IOException e) {
-            e.printStackTrace(); // Handle appropriately
+            e.printStackTrace();
         }
     }
 
@@ -44,7 +42,7 @@ public class DropDataStorage {
         } catch (FileNotFoundException e) {
             return new ArrayList<>(); // No file yet, return empty list
         } catch (IOException e) {
-            e.printStackTrace(); // Handle appropriately
+            e.printStackTrace();
             return null;
         }
     }

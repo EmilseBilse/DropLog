@@ -16,6 +16,6 @@ public class DroppedItem
         this.id = id;
         this.quantity = quantity;
         this.name = name;
-        this.value = 0; // Default or ignored value
+        this.value = 0;
     }
 }

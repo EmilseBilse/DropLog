@@ -69,7 +69,7 @@ public class ExamplePlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 		List<DroppedItem> loadedItems = new DropDataStorage().loadAllItems();
-		panel.populateAllRows(loadedItems); // Populate the panel with loaded items
+		panel.populateAllRows(loadedItems);
 
 		final Optional<Plugin> mainPlugin = pluginManager.getPlugins().stream().filter(p -> p.getName().equals("Drop Log")).findFirst();
 		if (mainPlugin.isPresent() && !pluginManager.isPluginEnabled(mainPlugin.get()))
@@ -113,7 +113,6 @@ public class ExamplePlugin extends Plugin
 			DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), item.getName());
 			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
 			new DropDataStorage().saveItem(itemWithoutValue);
-			System.out.println(itemManager.getItemPrice(item.getId()));
 		}
 	}
 
@@ -123,7 +122,6 @@ public class ExamplePlugin extends Plugin
 		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
 			return;
 		}
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "ContainerId: " + event.getContainerId() + " Inv id: " + InventoryID.INVENTORY.getId(), null);
 		initialInventory.clear();
 		for (Item item : event.getItemContainer().getItems()) {
 			DroppedItem invItem = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
