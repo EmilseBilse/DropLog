@@ -18,7 +18,7 @@ import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
-import org.woikaz.localstorage.InventoryItem;
+import org.woikaz.localstorage.CachedItem;
 import org.woikaz.ui.DropLogPanel;
 
 import java.awt.image.BufferedImage;
@@ -49,7 +49,7 @@ public class ExamplePlugin extends Plugin
 
 	private NavigationButton navButton;
 
-	private List<InventoryItem> initialInventory = new ArrayList<InventoryItem>();
+	private List<CachedItem> initialInventory = new ArrayList<CachedItem>();
 
 	@Override
 	protected void startUp() throws Exception
@@ -84,9 +84,9 @@ public class ExamplePlugin extends Plugin
 	{
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+			// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
 		}
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", gameStateChanged.getGameState().toString(), null);
+		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", gameStateChanged.getGameState().toString(), null);
 	}
 
 	@Subscribe
@@ -96,13 +96,14 @@ public class ExamplePlugin extends Plugin
 		{
 			return;
 		}
-		Optional<InventoryItem> foundItem = initialInventory.stream()
+		Optional<CachedItem> foundItem = initialInventory.stream()
 				.filter(item -> item.getId() == event.getItemId())
 				.findFirst();
 		if (foundItem.isPresent()) {
-			InventoryItem item = foundItem.get();
+			CachedItem item = foundItem.get();
+			// item.setId(itemManager.canonicalize(foundItem.get().getId()));
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + item.getId() + " Item name: " + item.getName() + " Item quantity: " + item.getQuantity(), "");
-			// SwingUtilities.invokeLater(() -> panel.droppedItem(item));
+			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
 		}
 	}
 
@@ -112,13 +113,15 @@ public class ExamplePlugin extends Plugin
 		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
 			return;
 		}
+		initialInventory.clear();
 		for (Item item : event.getItemContainer().getItems()) {
-			InventoryItem invItem = new InventoryItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName());
+			CachedItem invItem = new CachedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
 			initialInventory.add(invItem);
 		}
 
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", event.getItemContainer().getItem(0).getQuantity() + "", null);
+		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", event.getItemContainer().getItem(0).getQuantity() + "", null);
 		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + event.getContainerId() + Arrays.toString(event.getItemContainer().getItems()), null);
+		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "", null);
 		// log.info(Arrays.toString(event.getItemContainer().getItems()));
 	}
 

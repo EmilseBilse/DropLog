@@ -1,8 +1,11 @@
 package org.woikaz.localstorage;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Value;
 
-@Value
+@Data
+@AllArgsConstructor
 public class CachedItem
 {
     int id;

@@ -175,6 +175,30 @@ public class DropLogPanel  extends PluginPanel {
         updateList();
     }
 
+    public void droppedItem(CachedItem item) {
+        boolean itemExists = false;
+
+        for (DropLogTableRow row : rows) {
+            if (row.getItemName().equals(item.getName())) {
+                // Update quantity
+                System.out.println(row.getItemName() + " row item count: " + row.getItemCount());
+                System.out.println(item.getName() + " item quantity: " + item.getQuantity());
+                row.setQuantity(row.getItemCount() + item.getQuantity());
+                itemExists = true;
+                break;
+            }
+        }
+
+        if (!itemExists) {
+            // Add new row
+            DropLogTableRow newRow = new DropLogTableRow(item);
+            rows.add(newRow);
+        }
+
+        updateList();
+    }
+
+
     private DropLogTableRow buildRow(CachedItem item, boolean stripe)
     {
         DropLogTableRow row = new DropLogTableRow(item);
