@@ -2,6 +2,7 @@ package org.woikaz.localstorage;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Inject;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -10,7 +11,8 @@ import java.util.Optional;
 
 public class DropDataStorage {
     private static final String FILE_PATH = "dropLogData.json";
-    private final Gson gson = new Gson();
+    @Inject
+    private Gson gson;
 
     public void saveItem(DroppedItem item) {
         List<DroppedItem> items = loadAllItems(); // Load all items

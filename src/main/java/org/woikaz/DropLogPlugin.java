@@ -67,7 +67,9 @@ public class DropLogPlugin extends Plugin
 				.build();
 
 		clientToolbar.addNavigation(navButton);
-		List<DroppedItem> loadedItems = new DropDataStorage().loadAllItems();
+		DropDataStorage dropDataStorage = new DropDataStorage();
+		getInjector().injectMembers(dropDataStorage);
+		List<DroppedItem> loadedItems = dropDataStorage.loadAllItems();
 		panel.populateAllRows(loadedItems);
 
 		final Optional<Plugin> mainPlugin = pluginManager.getPlugins().stream().filter(p -> p.getName().equals("Drop Log")).findFirst();
@@ -88,7 +90,9 @@ public class DropLogPlugin extends Plugin
 	{
 		if (!isPricesSet && gameStateChanged.getGameState() == GameState.LOGGING_IN) {
 			isPricesSet = true;
-			List<DroppedItem> loadedItems = new DropDataStorage().loadAllItems();
+			DropDataStorage dropDataStorage = new DropDataStorage();
+			getInjector().injectMembers(dropDataStorage);
+			List<DroppedItem> loadedItems = dropDataStorage.loadAllItems();
 			for (DroppedItem item : loadedItems) {
 				int price = itemManager.getItemPrice(item.getId());
 				item.setValue(price);
