@@ -52,6 +52,8 @@ public class ExamplePlugin extends Plugin
 
 	private List<DroppedItem> initialInventory = new ArrayList<DroppedItem>();
 
+	private boolean isPricesSet = false;
+
 	@Override
 	protected void startUp() throws Exception
 	{
@@ -85,11 +87,15 @@ public class ExamplePlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+		if (!isPricesSet && gameStateChanged.getGameState() == GameState.LOGGING_IN) {
+			isPricesSet = true;
+			List<DroppedItem> loadedItems = new DropDataStorage().loadAllItems();
+			for (DroppedItem item : loadedItems) {
+				int price = itemManager.getItemPrice(item.getId());
+				item.setValue(price);
+			}
+			panel.populateAllRows(loadedItems);
 		}
-		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", gameStateChanged.getGameState().toString(), null);
 	}
 
 	@Subscribe
@@ -104,10 +110,10 @@ public class ExamplePlugin extends Plugin
 				.findFirst();
 		if (foundItem.isPresent()) {
 			DroppedItem item = foundItem.get();
-			// item.setId(itemManager.canonicalize(foundItem.get().getId()));
-			// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + item.getId() + " Item name: " + item.getName() + " Item quantity: " + item.getQuantity(), "");
+			DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), item.getName());
 			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
-			new DropDataStorage().saveItem(item);
+			new DropDataStorage().saveItem(itemWithoutValue);
+			System.out.println(itemManager.getItemPrice(item.getId()));
 		}
 	}
 
@@ -123,11 +129,6 @@ public class ExamplePlugin extends Plugin
 			DroppedItem invItem = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
 			initialInventory.add(invItem);
 		}
-
-		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", event.getItemContainer().getItem(0).getQuantity() + "", null);
-		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Item id: " + event.getContainerId() + Arrays.toString(event.getItemContainer().getItems()), null);
-		// client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "", null);
-		// log.info(Arrays.toString(event.getItemContainer().getItems()));
 	}
 
 	@Provides

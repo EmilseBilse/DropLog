@@ -11,4 +11,11 @@ public class DroppedItem
     int quantity;
     String name;
     int value;
+
+    public DroppedItem(int id, int quantity, String name) {
+        this.id = id;
+        this.quantity = quantity;
+        this.name = name;
+        this.value = 0; // Default or ignored value
+    }
 }
