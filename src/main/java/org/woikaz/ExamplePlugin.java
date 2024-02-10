@@ -113,6 +113,7 @@ public class ExamplePlugin extends Plugin
 		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
 			return;
 		}
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "ContainerId: " + event.getContainerId() + " Inv id: " + InventoryID.INVENTORY.getId(), null);
 		initialInventory.clear();
 		for (Item item : event.getItemContainer().getItems()) {
 			CachedItem invItem = new CachedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));

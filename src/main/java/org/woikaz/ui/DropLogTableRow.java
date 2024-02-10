@@ -149,6 +149,7 @@ public class DropLogTableRow extends JPanel {
 
     void setQuantity(int newQuantity) {
         item.setQuantity(newQuantity);
+        itemCount.setText(String.valueOf(newQuantity));
     }
 
     private JPanel buildItemNameField()
