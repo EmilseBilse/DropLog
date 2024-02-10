@@ -28,6 +28,9 @@ public class DropLogPanel  extends PluginPanel {
     private boolean ascendingOrder = false;
 
     private ArrayList<DropLogTableRow> rows = new ArrayList<>();
+    private List<DropLogTableRow> allRows = new ArrayList<>(); // For all items loaded from the file
+    private List<DropLogTableRow> sessionRows = new ArrayList<>(); // For items dropped in the current session
+    private boolean showingAllItems = true; // Toggle state
 
     public DropLogPanel(ExamplePlugin plugin) {
         this.plugin = plugin;
@@ -38,6 +41,25 @@ public class DropLogPanel  extends PluginPanel {
         JPanel headerContainer = buildHeader();
 
         listContainer.setLayout(new GridLayout(0, 1));
+
+        // Create a new panel for controls
+        JPanel controlPanel = new JPanel(new BorderLayout());
+        JButton toggleButton = new JButton("Show Current Session");
+        toggleButton.addActionListener(e -> {
+            toggleViewMode();
+            if (showingAllItems) {
+                toggleButton.setText("Show Current Session");
+            } else {
+                toggleButton.setText("Show All Time");
+            }
+        });
+
+        // Add the toggle button to the control panel
+        controlPanel.add(toggleButton, BorderLayout.CENTER);
+
+        // Now, add the control panel to your DropLogPanel layout
+        // Assuming your layout allows adding at the top or as per your design
+        add(controlPanel, BorderLayout.NORTH); // Adjust layout as per your panel setup
 
         add(headerContainer);
         add(listContainer);
@@ -160,7 +182,7 @@ public class DropLogPanel  extends PluginPanel {
         listContainer.repaint();
     }
 
-    void populate(List<DroppedItem> items)
+    /*void populate(List<DroppedItem> items)
     {
         rows.clear();
 
@@ -172,25 +194,50 @@ public class DropLogPanel  extends PluginPanel {
         }
 
         updateList();
-    }
+    }*/
 
     public void droppedItem(DroppedItem item) {
-        boolean itemExists = false;
-        for (DropLogTableRow row : rows) {
-            if (row.getItemName().equals(item.getName())) {
-                // Update quantity
-                row.setQuantity(row.getItemCount() + item.getQuantity());
-                itemExists = true;
-                break;
-            }
-        }
+        boolean itemExists = updateListWithItem(sessionRows, item); // Try updating sessionRows
 
         if (!itemExists) {
-            // Add new row
-            DropLogTableRow newRow = new DropLogTableRow(this, item);
-            rows.add(newRow);
+            // Add new row to sessionRows if item doesn't exist
+            DropLogTableRow newRow = buildRow(item, sessionRows.size() % 2 == 0);
+            sessionRows.add(newRow);
         }
 
+        // Repeat the process for allRows if you're loading items from a file or want to keep a persistent state across sessions
+        updateListWithItem(allRows, item);
+
+        if (showingAllItems) {
+            rows = new ArrayList<>(allRows);
+        } else {
+            rows = new ArrayList<>(sessionRows);
+        }
+
+        updateList(); // Refresh the view
+    }
+
+    private boolean updateListWithItem(List<DropLogTableRow> listToUpdate, DroppedItem item) {
+        for (DropLogTableRow row : listToUpdate) {
+            if (row.getItemName().equals(item.getName())) {
+                row.setQuantity(row.getItemCount() + item.getQuantity());
+                return true; // Item exists and was updated
+            }
+        }
+        return false; // Item does not exist
+    }
+
+    public void populate(List<DroppedItem> items) {
+        // Assuming this method populates from the .json file at startup
+        allRows.clear();
+        for (DroppedItem item : items) {
+            allRows.add(buildRow(item, allRows.size() % 2 == 0));
+        }
+        if (showingAllItems) {
+            rows = new ArrayList<>(allRows);
+        } else {
+            rows = new ArrayList<>(sessionRows); // Just in case populate is called after toggling
+        }
         updateList();
     }
 
@@ -220,4 +267,31 @@ public class DropLogPanel  extends PluginPanel {
         VALUE,
         NAME
     }
+
+    private void toggleViewMode() {
+        showingAllItems = !showingAllItems; // Toggle the state
+        if (showingAllItems) {
+            rows = new ArrayList<>(allRows); // Switch to all items
+        } else {
+            rows = new ArrayList<>(sessionRows); // Switch to session items
+        }
+        updateList(); // Refresh the view
+    }
+
+    public void populateAllRows(List<DroppedItem> loadedItems) {
+        allRows.clear(); // Clear existing items
+
+        for (DroppedItem item : loadedItems) {
+            DropLogTableRow row = buildRow(item, allRows.size() % 2 == 0);
+            allRows.add(row); // Populate allRows with new rows
+        }
+
+        // If we're showing all items, update the displayed rows accordingly
+        if (showingAllItems) {
+            rows = new ArrayList<>(allRows); // Copy allRows to rows for display
+            updateList(); // Refresh the UI
+        }
+    }
+
+
 }

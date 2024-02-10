@@ -67,6 +67,7 @@ public class ExamplePlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 		List<DroppedItem> loadedItems = new DropDataStorage().loadAllItems();
+		panel.populateAllRows(loadedItems); // Populate the panel with loaded items
 
 		final Optional<Plugin> mainPlugin = pluginManager.getPlugins().stream().filter(p -> p.getName().equals("Drop Log")).findFirst();
 		if (mainPlugin.isPresent() && !pluginManager.isPluginEnabled(mainPlugin.get()))
