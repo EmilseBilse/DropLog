@@ -56,7 +56,7 @@ public class ExamplePlugin extends Plugin
 	{
 		log.info("Example started!");
 		panel = new DropLogPanel(this);
-		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/woikaz/droplog/delete-white.png");
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/woikaz/droplog/loottracker2.png");
 		navButton = NavigationButton.builder()
 				.tooltip("Drop Log")
 				.icon(icon)

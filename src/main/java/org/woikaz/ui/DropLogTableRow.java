@@ -54,9 +54,32 @@ public class DropLogTableRow extends JPanel {
 
         // Add action listeners to menu items (example for removeXItem)
         removeXItem.addActionListener(e -> {
-            // Your code to edit the item
-            System.out.println("Edit action triggered for " + this.item.getName());
+            // Prompt the user to enter the amount to remove
+            String amountStr = JOptionPane.showInputDialog(this, "Enter amount to remove:", "Remove Amount", JOptionPane.PLAIN_MESSAGE);
+            if (amountStr != null && !amountStr.isEmpty()) {
+                try {
+                    int amountToRemove = Integer.parseInt(amountStr);
+                    if (amountToRemove > 0 && amountToRemove <= this.item.getQuantity()) {
+                        // Update the item's quantity
+                        int newQuantity = this.item.getQuantity() - amountToRemove;
+                        this.item.setQuantity(newQuantity); // Assuming setQuantity updates both the model and the UI
+                        setQuantity(newQuantity);
+
+                        // Update the UI to reflect the new quantity, if necessary
+                        // This might involve calling parentPanel.updateList() or similar
+                        parentPanel.updateList(); // Hypothetical method to refresh the list
+
+                        System.out.println("Removed " + amountToRemove + " units of " + this.item.getName());
+                    } else {
+                        // Handle invalid input (e.g., number too large or negative)
+                        JOptionPane.showMessageDialog(this, "Invalid amount entered.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
+
 
         // Add items to the popup menu
         popupMenu.add(deleteItem);
@@ -168,8 +191,15 @@ public class DropLogTableRow extends JPanel {
     }
 
     void setQuantity(int newQuantity) {
+        // Update the item's quantity
         item.setQuantity(newQuantity);
-        itemCount.setText(String.valueOf(newQuantity));
+
+        // Update the itemCount label
+        itemCount.setText(QuantityFormatter.quantityToStackSize(newQuantity)); // Assuming you want to keep using the QuantityFormatter for consistency
+
+        // Calculate the new price and update the value label
+        int newPrice = getPrice(); // This will use the updated quantity
+        value.setText(QuantityFormatter.quantityToStackSize(newPrice)); // Update the value label with the new price, formatted accordingly
     }
 
     private JPanel buildItemNameField()
