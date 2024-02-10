@@ -29,7 +29,7 @@ import java.util.*;
 @PluginDescriptor(
 	name = "Drop Log"
 )
-public class ExamplePlugin extends Plugin
+public class DropLogPlugin extends Plugin
 {
 	@Inject
 	private Client client;
@@ -38,7 +38,7 @@ public class ExamplePlugin extends Plugin
 	private ItemManager itemManager;
 
 	@Inject
-	private ExampleConfig config;
+	private DropLogConfig config;
 
 	@Inject
 	private ClientToolbar clientToolbar;
@@ -129,8 +129,8 @@ public class ExamplePlugin extends Plugin
 	}
 
 	@Provides
-	ExampleConfig provideConfig(ConfigManager configManager)
+	DropLogConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(ExampleConfig.class);
+		return configManager.getConfig(DropLogConfig.class);
 	}
 }

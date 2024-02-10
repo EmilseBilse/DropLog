@@ -3,7 +3,7 @@ package org.woikaz.ui;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
-import org.woikaz.ExamplePlugin;
+import org.woikaz.DropLogPlugin;
 import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DropLogPanel  extends PluginPanel {
-    private final ExamplePlugin plugin;
+    private final DropLogPlugin plugin;
 
     private static final Color ODD_ROW = new Color(44, 44, 44);
 
@@ -32,7 +32,7 @@ public class DropLogPanel  extends PluginPanel {
     private List<DropLogTableRow> sessionRows = new ArrayList<>(); // For items dropped in the current session
     private boolean showingAllItems = true;
 
-    public DropLogPanel(ExamplePlugin plugin) {
+    public DropLogPanel(DropLogPlugin plugin) {
         this.plugin = plugin;
 
         setBorder(null);
