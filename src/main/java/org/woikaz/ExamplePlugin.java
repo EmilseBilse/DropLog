@@ -57,9 +57,8 @@ public class ExamplePlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Example started!");
 		panel = new DropLogPanel(this);
-		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/woikaz/droplog/loottracker2.png");
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/woikaz/droplog/droppings.png");
 		navButton = NavigationButton.builder()
 				.tooltip("Drop Log")
 				.icon(icon)
