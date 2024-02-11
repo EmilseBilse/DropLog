@@ -38,9 +38,6 @@ public class DropLogPlugin extends Plugin
 	private ItemManager itemManager;
 
 	@Inject
-	private DropLogConfig config;
-
-	@Inject
 	private ClientToolbar clientToolbar;
 
 	@Inject
@@ -130,11 +127,5 @@ public class DropLogPlugin extends Plugin
 			DroppedItem invItem = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
 			initialInventory.add(invItem);
 		}
-	}
-
-	@Provides
-	DropLogConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(DropLogConfig.class);
 	}
 }
