@@ -1,5 +1,5 @@
 # Drop Log
-The Drop Log plugin is designed for gamers who want to keep track of items they've intentionally dropped during their gaming sessions. Unlike traditional drop trackers that focus on loot from monsters, Drop Log offers a unique perspective by logging the items players drop, helping manage inventory decisions and understand their dropping habits better.
+The Drop Log plugin is designed to keep track of items the player has intentionally dropped during their session. Unlike traditional drop trackers that focus on loot from monsters, Drop Log offers a unique perspective by logging the items players drop, helping manage inventory decisions and understand their dropping habits better.
 
 ## Features
 
