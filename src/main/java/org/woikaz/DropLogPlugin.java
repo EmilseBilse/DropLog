@@ -112,7 +112,9 @@ public class DropLogPlugin extends Plugin
 			DroppedItem item = foundItem.get();
 			DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), item.getName());
 			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
-			new DropDataStorage().saveItem(itemWithoutValue);
+			DropDataStorage dropDataStorage = new DropDataStorage();
+			getInjector().injectMembers(dropDataStorage);
+			dropDataStorage.saveItem(itemWithoutValue);
 		}
 	}
 

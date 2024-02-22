@@ -39,13 +39,32 @@ public class DropDataStorage {
     }
 
     public List<DroppedItem> loadAllItems() {
-        try (Reader reader = new FileReader(FILE_PATH)) {
-            return gson.fromJson(reader, new TypeToken<List<DroppedItem>>(){}.getType());
+        List<DroppedItem> items = new ArrayList<>();
+        File file = new File(FILE_PATH);
+
+        // Check if the file exists, and if not, create it
+        if (!file.exists()) {
+            try {
+                System.out.println("Create new file");
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("New file failed");
+            }
+        }
+
+        // Proceed with loading items from the file
+        try (Reader reader = new FileReader(file)) {
+            List<DroppedItem> result = gson.fromJson(reader, new TypeToken<List<DroppedItem>>(){}.getType());
+            if (result != null) {
+                items = result;
+            }
         } catch (FileNotFoundException e) {
-            return new ArrayList<>(); // No file yet, return empty list
+            // This exception should not occur since we've just checked/created the file
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
+        return items;
     }
 }
