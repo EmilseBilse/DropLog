@@ -179,19 +179,19 @@ public class DropLogPanel  extends PluginPanel {
     }
 
     public void droppedItem(DroppedItem item) {
-        updateListWithItem(sessionRows, item);
+        DroppedItem itemClone1 = item.clone();
+        updateListWithItem(sessionRows, itemClone1);
 
-        updateListWithItem(allRows, item);
+        DroppedItem itemClone2 = item.clone();
+        updateListWithItem(allRows, itemClone2);
 
-        // Decide which list to display based on the current mode
         rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
-
         updateList();
     }
 
     private boolean updateListWithItem(List<DropLogTableRow> listToUpdate, DroppedItem item) {
         for (DropLogTableRow row : listToUpdate) {
-            if (row.getItemName().equals(item.getName())) {
+            if (row.getItemName().equals(item.getName().trim())) {
                 row.setQuantity(row.getItemCount() + item.getQuantity());
                 return true; // Item was found and updated
             }
