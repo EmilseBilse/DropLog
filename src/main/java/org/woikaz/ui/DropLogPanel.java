@@ -180,18 +180,15 @@ public class DropLogPanel  extends PluginPanel {
 
     public void droppedItem(DroppedItem item) {
         updateListWithItem(sessionRows, item);
-
         updateListWithItem(allRows, item);
 
-        // Decide which list to display based on the current mode
         rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
-
         updateList();
     }
 
     private boolean updateListWithItem(List<DropLogTableRow> listToUpdate, DroppedItem item) {
         for (DropLogTableRow row : listToUpdate) {
-            if (row.getItemName().equals(item.getName())) {
+            if (row.getItemName().equals(item.getName().trim())) {
                 row.setQuantity(row.getItemCount() + item.getQuantity());
                 return true; // Item was found and updated
             }
