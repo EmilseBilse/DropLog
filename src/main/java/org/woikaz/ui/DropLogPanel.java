@@ -179,8 +179,11 @@ public class DropLogPanel  extends PluginPanel {
     }
 
     public void droppedItem(DroppedItem item) {
-        updateListWithItem(sessionRows, item);
-        updateListWithItem(allRows, item);
+        DroppedItem itemClone1 = item.clone();
+        updateListWithItem(sessionRows, itemClone1);
+
+        DroppedItem itemClone2 = item.clone();
+        updateListWithItem(allRows, itemClone2);
 
         rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
         updateList();

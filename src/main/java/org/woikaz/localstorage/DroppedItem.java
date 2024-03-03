@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class DroppedItem
+public class DroppedItem implements Cloneable
 {
     int id;
     int quantity;
@@ -17,5 +17,15 @@ public class DroppedItem
         this.quantity = quantity;
         this.name = name;
         this.value = 0;
+    }
+
+    @Override
+    public DroppedItem clone() {
+        try {
+            return (DroppedItem) super.clone();
+        } catch (CloneNotSupportedException e) {
+            // This shouldn't happen since we're Cloneable
+            throw new AssertionError();
+        }
     }
 }
