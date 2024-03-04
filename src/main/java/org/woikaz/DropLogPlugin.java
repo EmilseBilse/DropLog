@@ -47,8 +47,10 @@ public class DropLogPlugin extends Plugin
 	private DropLogPanel panel;
 
 	private NavigationButton navButton;
+	private DropDataStorage dropDataStorage = new DropDataStorage();
 
 	private List<DroppedItem> initialInventory = new ArrayList<DroppedItem>();
+	private List<Integer> pendingDrops = new ArrayList<Integer>();
 
 	private boolean isPricesSet = false;
 
@@ -65,7 +67,7 @@ public class DropLogPlugin extends Plugin
 				.build();
 
 		clientToolbar.addNavigation(navButton);
-		DropDataStorage dropDataStorage = new DropDataStorage();
+		// DropDataStorage dropDataStorage = new DropDataStorage();
 		getInjector().injectMembers(dropDataStorage);
 		List<DroppedItem> loadedItems = dropDataStorage.loadAllItems();
 		panel.populateAllRows(loadedItems);
@@ -88,7 +90,7 @@ public class DropLogPlugin extends Plugin
 	{
 		if (!isPricesSet && gameStateChanged.getGameState() == GameState.LOGGING_IN) {
 			isPricesSet = true;
-			DropDataStorage dropDataStorage = new DropDataStorage();
+			// DropDataStorage dropDataStorage = new DropDataStorage();
 			getInjector().injectMembers(dropDataStorage);
 			List<DroppedItem> loadedItems = dropDataStorage.loadAllItems();
 			for (DroppedItem item : loadedItems) {
@@ -100,43 +102,49 @@ public class DropLogPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-		if (!Objects.equals(event.getMenuOption(), "Drop"))
-		{
+	public void onMenuOptionClicked(MenuOptionClicked event) {
+		if (!"Drop".equals(event.getMenuOption())) {
 			return;
 		}
-		Optional<DroppedItem> foundItem = initialInventory.stream()
-				.filter(item -> item.getId() == event.getItemId())
-				.findFirst();
-		if (foundItem.isPresent()) {
-			DroppedItem item = foundItem.get();
-			DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), item.getName());
-			SwingUtilities.invokeLater(() -> panel.droppedItem(item));
-			DropDataStorage dropDataStorage = new DropDataStorage();
-			getInjector().injectMembers(dropDataStorage);
-			dropDataStorage.saveItem(itemWithoutValue);
-		}
+		pendingDrops.add(event.getItemId());
+	}
+
+
+	private void handleDroppedItem(DroppedItem item) {
+		DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), item.getName());
+		SwingUtilities.invokeLater(() -> panel.droppedItem(item));
+		getInjector().injectMembers(dropDataStorage);
+		dropDataStorage.saveItem(itemWithoutValue);
 	}
 
 	@Subscribe
-	public void onItemSpawned(ItemSpawned event)
-	{
-		TileItem item = event.getItem();
-		log.info(item.getId() + "");
-		log.info(item.getQuantity() + "");
-	}
-
-	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged event)
-	{
+	public void onItemContainerChanged(ItemContainerChanged event) {
 		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
 			return;
 		}
+		updateInitialInventory(event.getItemContainer());
+	}
+
+	private void updateInitialInventory(ItemContainer container) {
 		initialInventory.clear();
-		for (Item item : event.getItemContainer().getItems()) {
-			DroppedItem invItem = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
-			initialInventory.add(invItem);
+		Arrays.stream(container.getItems())
+				.map(item -> new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId())))
+				.forEach(initialInventory::add);
+	}
+
+	@Subscribe
+	public void onItemSpawned(ItemSpawned event) {
+		TileItem item = event.getItem();
+		if (pendingDrops.contains(item.getId())) {
+			DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName());
+			SwingUtilities.invokeLater(() -> panel.droppedItem(itemWithoutValue));
+			getInjector().injectMembers(dropDataStorage);
+			dropDataStorage.saveItem(itemWithoutValue);
+
+			// Remove from pending drops
+			pendingDrops.remove(Integer.valueOf(item.getId()));
 		}
 	}
+
+
 }
