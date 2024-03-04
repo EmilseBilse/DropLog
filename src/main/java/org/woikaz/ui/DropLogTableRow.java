@@ -3,6 +3,7 @@ package org.woikaz.ui;
 import lombok.Getter;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.QuantityFormatter;
+import org.woikaz.localstorage.DropDataStorage;
 import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
@@ -27,6 +28,8 @@ public class DropLogTableRow extends JPanel {
 
     private Color lastBackground;
 
+    private DropDataStorage dropDataStorage = new DropDataStorage();
+
     DropLogTableRow(DropLogPanel parentPanel, DroppedItem item)
     {
         this.parentPanel = parentPanel;
@@ -41,6 +44,9 @@ public class DropLogTableRow extends JPanel {
 
         deleteItem.addActionListener(e -> {
             parentPanel.removeRow(DropLogTableRow.this);
+
+            String itemName = DropLogTableRow.this.getItemName();
+            dropDataStorage.removeItem(itemName); // Remove the item from the JSON file
         });
 
         removeXItem.addActionListener(e -> {

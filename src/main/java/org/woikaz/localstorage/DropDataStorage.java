@@ -38,6 +38,21 @@ public class DropDataStorage {
         }
     }
 
+    public void removeItem(String itemName) {
+        List<DroppedItem> items = loadAllItems(); // Load all current items
+
+        // Remove the item with the matching name
+        items.removeIf(item -> item.getName().equals(itemName));
+
+        // Save the updated list back to the JSON file
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(items, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public List<DroppedItem> loadAllItems() {
         List<DroppedItem> items = new ArrayList<>();
         File file = new File(FILE_PATH);
