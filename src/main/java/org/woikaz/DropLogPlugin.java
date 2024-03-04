@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.ItemSpawned;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -116,6 +117,14 @@ public class DropLogPlugin extends Plugin
 			getInjector().injectMembers(dropDataStorage);
 			dropDataStorage.saveItem(itemWithoutValue);
 		}
+	}
+
+	@Subscribe
+	public void onItemSpawned(ItemSpawned event)
+	{
+		TileItem item = event.getItem();
+		log.info(item.getId() + "");
+		log.info(item.getQuantity() + "");
 	}
 
 	@Subscribe
