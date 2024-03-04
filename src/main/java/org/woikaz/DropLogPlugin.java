@@ -109,14 +109,6 @@ public class DropLogPlugin extends Plugin
 		pendingDrops.add(event.getItemId());
 	}
 
-
-	private void handleDroppedItem(DroppedItem item) {
-		DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), item.getName());
-		SwingUtilities.invokeLater(() -> panel.droppedItem(item));
-		getInjector().injectMembers(dropDataStorage);
-		dropDataStorage.saveItem(itemWithoutValue);
-	}
-
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event) {
 		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
@@ -137,14 +129,12 @@ public class DropLogPlugin extends Plugin
 		TileItem item = event.getItem();
 		if (pendingDrops.contains(item.getId())) {
 			DroppedItem itemWithoutValue = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName());
-			SwingUtilities.invokeLater(() -> panel.droppedItem(itemWithoutValue));
+			DroppedItem itemWithValue = new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId()));
+			SwingUtilities.invokeLater(() -> panel.droppedItem(itemWithValue));
 			getInjector().injectMembers(dropDataStorage);
 			dropDataStorage.saveItem(itemWithoutValue);
 
-			// Remove from pending drops
 			pendingDrops.remove(Integer.valueOf(item.getId()));
 		}
 	}
-
-
 }
