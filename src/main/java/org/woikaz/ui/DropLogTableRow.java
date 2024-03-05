@@ -41,8 +41,13 @@ public class DropLogTableRow extends JPanel {
         JMenuItem removeXItem = new JMenuItem("Remove X");
 
         deleteItem.addActionListener(e -> {
-            parentPanel.removeRow(DropLogTableRow.this);
+            int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + this.getItemName() + "?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+            if (response == JOptionPane.YES_OPTION) {
+                parentPanel.removeRow(DropLogTableRow.this);
+            }
         });
+
 
         removeXItem.addActionListener(e -> {
             // Prompt the user to enter the amount to remove
