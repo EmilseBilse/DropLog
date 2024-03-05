@@ -6,10 +6,7 @@ import javax.swing.*;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.events.ItemSpawned;
-import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -53,8 +50,8 @@ public class DropLogPlugin extends Plugin
 	private NavigationButton navButton;
 	private DropDataStorage dropDataStorage = new DropDataStorage();
 
-	private List<DroppedItem> initialInventory = new ArrayList<DroppedItem>();
 	private List<Integer> pendingDrops = new ArrayList<Integer>();
+	private List<Integer> pendingTakes = new ArrayList<>();
 
 	@Provides
 	DropLogConfig getConfig(ConfigManager configManager)
@@ -110,29 +107,25 @@ public class DropLogPlugin extends Plugin
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
-		if (!"Drop".equals(event.getMenuOption())) {
+		String menuOption = event.getMenuOption();
+		if (!"Drop".equalsIgnoreCase(menuOption) && !"Take".equalsIgnoreCase(menuOption)) {
 			return;
 		}
 		String itemName = client.getItemDefinition(event.getItemId()).getName();
 		if (isItemBlacklisted(itemName, config.blackListedItems())) {
 			return;
 		}
-		pendingDrops.add(event.getItemId());
-	}
-
-	@Subscribe
-	public void onItemContainerChanged(ItemContainerChanged event) {
-		if (event.getContainerId() != InventoryID.INVENTORY.getId()) {
-			return;
+		switch (event.getMenuOption()) {
+			case "Drop":
+				pendingDrops.add(event.getItemId());
+				break;
+			case "Take":
+				if (!config.removeOnPickUp()) {
+					return;
+				}
+				pendingTakes.add(event.getId());
+				break;
 		}
-		updateInitialInventory(event.getItemContainer());
-	}
-
-	private void updateInitialInventory(ItemContainer container) {
-		initialInventory.clear();
-		Arrays.stream(container.getItems())
-				.map(item -> new DroppedItem(item.getId(), item.getQuantity(), client.getItemDefinition(item.getId()).getName(), itemManager.getItemPrice(item.getId())))
-				.forEach(initialInventory::add);
 	}
 
 	@Subscribe
@@ -146,6 +139,22 @@ public class DropLogPlugin extends Plugin
 			dropDataStorage.saveItem(itemWithoutValue);
 
 			pendingDrops.remove(Integer.valueOf(item.getId()));
+		}
+	}
+
+	@Subscribe
+	public void onItemDespawned(ItemDespawned event) {
+		TileItem item = event.getItem();
+		String itemName = client.getItemDefinition(item.getId()).getName();
+
+		if (pendingTakes.contains(item.getId())) {
+			getInjector().injectMembers(dropDataStorage);
+			dropDataStorage.decreaseItemQuantity(itemName, item.getQuantity());
+
+			DroppedItem itemToUpdate = new DroppedItem(item.getId(), item.getQuantity(), itemName); // Create a DroppedItem with quantity to decrease
+			panel.removeDroppedItem(itemToUpdate);
+
+			pendingTakes.remove(Integer.valueOf(item.getId()));
 		}
 	}
 

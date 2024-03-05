@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -212,6 +213,32 @@ public class DropLogPanel  extends PluginPanel {
         DropLogTableRow newRow = buildRow(item, listToUpdate.size() % 2 == 0);
         listToUpdate.add(newRow);
         return false; // A new item was added
+    }
+
+    public void removeDroppedItem(DroppedItem item) {
+        SwingUtilities.invokeLater(() -> {
+            updateListWithItemForRemoval(sessionRows, item);
+            updateListWithItemForRemoval(allRows, item);
+            rows = showingAllItems ? new ArrayList<>(allRows) : new ArrayList<>(sessionRows);
+            updateList();
+        });
+    }
+
+    private boolean updateListWithItemForRemoval(List<DropLogTableRow> listToUpdate, DroppedItem item) {
+        Iterator<DropLogTableRow> iterator = listToUpdate.iterator();
+        while (iterator.hasNext()) {
+            DropLogTableRow row = iterator.next();
+            if (row.getItemName().equals(item.getName().trim())) {
+                int newQuantity = row.getItemCount() - item.getQuantity();
+                if (newQuantity > 0) {
+                    row.setQuantity(newQuantity);
+                } else {
+                    iterator.remove();
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     public void removeRow(DropLogTableRow row) {
