@@ -120,11 +120,9 @@ public class DropLogPlugin extends Plugin
 				pendingDrops.add(event.getItemId());
 				break;
 			case "Take":
-				log.info("YAAAY, TAKE!");
-				/*
-				// Assuming the amount taken is 1, adjust as necessary
-				getInjector().injectMembers(dropDataStorage);
-				dropDataStorage.decreaseItemQuantity(itemNameTake, 1);*/
+				if (!config.removeOnPickUp()) {
+					return;
+				}
 				pendingTakes.add(event.getId());
 				break;
 		}
@@ -148,12 +146,13 @@ public class DropLogPlugin extends Plugin
 	public void onItemDespawned(ItemDespawned event) {
 		TileItem item = event.getItem();
 		String itemName = client.getItemDefinition(item.getId()).getName();
-		log.info(itemName);
-		log.info(pendingTakes.toString());
 
 		if (pendingTakes.contains(item.getId())) {
 			getInjector().injectMembers(dropDataStorage);
 			dropDataStorage.decreaseItemQuantity(itemName, item.getQuantity());
+
+			DroppedItem itemToUpdate = new DroppedItem(item.getId(), item.getQuantity(), itemName); // Create a DroppedItem with quantity to decrease
+			panel.removeDroppedItem(itemToUpdate);
 
 			pendingTakes.remove(Integer.valueOf(item.getId()));
 		}
