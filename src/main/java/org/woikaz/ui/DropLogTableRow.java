@@ -3,6 +3,7 @@ package org.woikaz.ui;
 import lombok.Getter;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.QuantityFormatter;
+import org.woikaz.localstorage.DropDataStorage;
 import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
@@ -40,8 +41,13 @@ public class DropLogTableRow extends JPanel {
         JMenuItem removeXItem = new JMenuItem("Remove X");
 
         deleteItem.addActionListener(e -> {
-            parentPanel.removeRow(DropLogTableRow.this);
+            int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete " + this.getItemName() + "?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+            if (response == JOptionPane.YES_OPTION) {
+                parentPanel.removeRow(DropLogTableRow.this);
+            }
         });
+
 
         removeXItem.addActionListener(e -> {
             // Prompt the user to enter the amount to remove
@@ -49,15 +55,19 @@ public class DropLogTableRow extends JPanel {
             if (amountStr != null && !amountStr.isEmpty()) {
                 try {
                     int amountToRemove = Integer.parseInt(amountStr);
-                    if (amountToRemove > 0 && amountToRemove <= this.item.getQuantity()) {
+                    if (amountToRemove > 0) {
                         int newQuantity = this.item.getQuantity() - amountToRemove;
+                        if (newQuantity < 0) {
+                            newQuantity = 0;
+                        }
                         this.item.setQuantity(newQuantity);
                         setQuantity(newQuantity);
 
                         parentPanel.updateList();
+                        parentPanel.removeQuantity(this.getItemName(), newQuantity);
 
                     } else {
-                        // Handle invalid input (e.g., number too large or negative)
+                        // Handle invalid input (negative)
                         JOptionPane.showMessageDialog(this, "Invalid amount entered.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (NumberFormatException ex) {

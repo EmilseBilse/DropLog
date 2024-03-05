@@ -15,7 +15,7 @@ public class DropDataStorage {
     private Gson gson;
 
     public void saveItem(DroppedItem item) {
-        List<DroppedItem> items = loadAllItems(); // Load all items
+        List<DroppedItem> items = loadAllItems();
 
         Optional<DroppedItem> existingItemOpt = items.stream()
                 .filter(i -> i.getName().equals(item.getName()))
@@ -37,6 +37,39 @@ public class DropDataStorage {
             e.printStackTrace();
         }
     }
+
+    public void removeItem(String itemName) {
+        List<DroppedItem> items = loadAllItems();
+
+        items.removeIf(item -> item.getName().equals(itemName));
+
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(items, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setItemQuantity(String itemName, int newQuantity) {
+        List<DroppedItem> items = loadAllItems();
+
+        if (newQuantity > 0) {
+            items.forEach(item -> {
+                if (item.getName().equals(itemName)) {
+                    item.setQuantity(newQuantity);
+                }
+            });
+        } else {
+            items.removeIf(item -> item.getName().equals(itemName));
+        }
+
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(items, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public List<DroppedItem> loadAllItems() {
         List<DroppedItem> items = new ArrayList<>();

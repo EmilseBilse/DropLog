@@ -4,6 +4,7 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
 import org.woikaz.DropLogPlugin;
+import org.woikaz.localstorage.DropDataStorage;
 import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
@@ -12,6 +13,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static net.runelite.client.RuneLite.getInjector;
 
 public class DropLogPanel  extends PluginPanel {
     private final DropLogPlugin plugin;
@@ -32,8 +36,12 @@ public class DropLogPanel  extends PluginPanel {
     private List<DropLogTableRow> sessionRows = new ArrayList<>(); // For items dropped in the current session
     private boolean showingAllItems = true;
 
+    private DropDataStorage dropDataStorage;
+
     public DropLogPanel(DropLogPlugin plugin) {
         this.plugin = plugin;
+        dropDataStorage = new DropDataStorage();
+        getInjector().injectMembers(dropDataStorage);
 
         setBorder(null);
         setLayout(new DynamicGridLayout(0, 1));
@@ -150,7 +158,12 @@ public class DropLogPanel  extends PluginPanel {
 
     void updateList()
     {
-        rows.sort((r1, r2) ->
+
+        List<DropLogTableRow> filteredRows = rows.stream()
+                .filter(row -> row.getItemCount() > 0)
+                .collect(Collectors.toList());
+
+        filteredRows.sort((r1, r2) ->
         {
             switch (orderIndex)
             {
@@ -167,9 +180,9 @@ public class DropLogPanel  extends PluginPanel {
 
         listContainer.removeAll();
 
-        for (int i = 0; i < rows.size(); i++)
+        for (int i = 0; i < filteredRows.size(); i++)
         {
-            DropLogTableRow row = rows.get(i);
+            DropLogTableRow row = filteredRows.get(i);
             row.setBackground(i % 2 == 0 ? ODD_ROW : ColorScheme.DARK_GRAY_COLOR);
             listContainer.add(row);
         }
@@ -208,6 +221,17 @@ public class DropLogPanel  extends PluginPanel {
 
         listContainer.revalidate();
         listContainer.repaint();
+
+        String itemName = row.getItemName();
+        if (showingAllItems) {
+            dropDataStorage.removeItem(itemName); // Remove the item from the JSON file
+        }
+    }
+
+    public void removeQuantity(String itemName, Integer newQuantity) {
+        if (showingAllItems) {
+            dropDataStorage.setItemQuantity(itemName, newQuantity);
+        }
     }
 
 

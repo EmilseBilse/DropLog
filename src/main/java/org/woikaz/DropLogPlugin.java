@@ -71,6 +71,7 @@ public class DropLogPlugin extends Plugin
 		getInjector().injectMembers(dropDataStorage);
 		List<DroppedItem> loadedItems = dropDataStorage.loadAllItems();
 		panel.populateAllRows(loadedItems);
+		getInjector().injectMembers(panel);
 
 		final Optional<Plugin> mainPlugin = pluginManager.getPlugins().stream().filter(p -> p.getName().equals("Drop Log")).findFirst();
 		if (mainPlugin.isPresent() && !pluginManager.isPluginEnabled(mainPlugin.get()))
