@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.runelite.client.RuneLite.getInjector;
 
@@ -157,7 +158,12 @@ public class DropLogPanel  extends PluginPanel {
 
     void updateList()
     {
-        rows.sort((r1, r2) ->
+
+        List<DropLogTableRow> filteredRows = rows.stream()
+                .filter(row -> row.getItemCount() > 0)
+                .collect(Collectors.toList());
+
+        filteredRows.sort((r1, r2) ->
         {
             switch (orderIndex)
             {
@@ -174,9 +180,9 @@ public class DropLogPanel  extends PluginPanel {
 
         listContainer.removeAll();
 
-        for (int i = 0; i < rows.size(); i++)
+        for (int i = 0; i < filteredRows.size(); i++)
         {
-            DropLogTableRow row = rows.get(i);
+            DropLogTableRow row = filteredRows.get(i);
             row.setBackground(i % 2 == 0 ? ODD_ROW : ColorScheme.DARK_GRAY_COLOR);
             listContainer.add(row);
         }
