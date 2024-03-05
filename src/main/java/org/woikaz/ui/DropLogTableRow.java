@@ -61,6 +61,7 @@ public class DropLogTableRow extends JPanel {
                         setQuantity(newQuantity);
 
                         parentPanel.updateList();
+                        parentPanel.removeQuantity(this.getItemName(), newQuantity);
 
                     } else {
                         // Handle invalid input (e.g., number too large or negative)

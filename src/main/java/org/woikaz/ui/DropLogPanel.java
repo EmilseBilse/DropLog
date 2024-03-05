@@ -222,6 +222,12 @@ public class DropLogPanel  extends PluginPanel {
         }
     }
 
+    public void removeQuantity(String itemName, Integer newQuantity) {
+        if (showingAllItems) {
+            dropDataStorage.setItemQuantity(itemName, newQuantity);
+        }
+    }
+
 
     private DropLogTableRow buildRow(DroppedItem item, boolean stripe)
     {
