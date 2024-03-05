@@ -217,7 +217,9 @@ public class DropLogPanel  extends PluginPanel {
         listContainer.repaint();
 
         String itemName = row.getItemName();
-        dropDataStorage.removeItem(itemName); // Remove the item from the JSON file
+        if (showingAllItems) {
+            dropDataStorage.removeItem(itemName); // Remove the item from the JSON file
+        }
     }
 
 
