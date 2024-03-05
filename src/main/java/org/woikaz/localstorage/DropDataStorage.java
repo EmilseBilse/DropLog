@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 public class DropDataStorage {
@@ -69,6 +70,33 @@ public class DropDataStorage {
             e.printStackTrace();
         }
     }
+
+    public void decreaseItemQuantity(String itemName, int decreaseAmount) {
+        List<DroppedItem> items = loadAllItems();
+
+        ListIterator<DroppedItem> iterator = items.listIterator();
+        while (iterator.hasNext()) {
+            DroppedItem item = iterator.next();
+            if (item.getName().equals(itemName)) {
+                int newQuantity = item.getQuantity() - decreaseAmount;
+                if (newQuantity > 0) {
+                    item.setQuantity(newQuantity);
+                } else {
+                    // Remove the item if the new quantity is 0 or less
+                    iterator.remove();
+                }
+                break; // Assuming item names are unique, break after finding the match
+            }
+        }
+
+        // Save the updated list back to the JSON file
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(items, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public List<DroppedItem> loadAllItems() {
