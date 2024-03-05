@@ -28,8 +28,6 @@ public class DropLogTableRow extends JPanel {
 
     private Color lastBackground;
 
-    private DropDataStorage dropDataStorage = new DropDataStorage();
-
     DropLogTableRow(DropLogPanel parentPanel, DroppedItem item)
     {
         this.parentPanel = parentPanel;
@@ -44,9 +42,6 @@ public class DropLogTableRow extends JPanel {
 
         deleteItem.addActionListener(e -> {
             parentPanel.removeRow(DropLogTableRow.this);
-
-            String itemName = DropLogTableRow.this.getItemName();
-            dropDataStorage.removeItem(itemName); // Remove the item from the JSON file
         });
 
         removeXItem.addActionListener(e -> {

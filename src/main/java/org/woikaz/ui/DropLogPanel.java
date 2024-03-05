@@ -4,6 +4,7 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
 import org.woikaz.DropLogPlugin;
+import org.woikaz.localstorage.DropDataStorage;
 import org.woikaz.localstorage.DroppedItem;
 
 import javax.swing.*;
@@ -12,6 +13,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.runelite.client.RuneLite.getInjector;
 
 public class DropLogPanel  extends PluginPanel {
     private final DropLogPlugin plugin;
@@ -32,8 +35,12 @@ public class DropLogPanel  extends PluginPanel {
     private List<DropLogTableRow> sessionRows = new ArrayList<>(); // For items dropped in the current session
     private boolean showingAllItems = true;
 
+    private DropDataStorage dropDataStorage;
+
     public DropLogPanel(DropLogPlugin plugin) {
         this.plugin = plugin;
+        dropDataStorage = new DropDataStorage();
+        getInjector().injectMembers(dropDataStorage);
 
         setBorder(null);
         setLayout(new DynamicGridLayout(0, 1));
@@ -208,6 +215,9 @@ public class DropLogPanel  extends PluginPanel {
 
         listContainer.revalidate();
         listContainer.repaint();
+
+        String itemName = row.getItemName();
+        dropDataStorage.removeItem(itemName); // Remove the item from the JSON file
     }
 
 
