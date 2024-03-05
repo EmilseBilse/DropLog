@@ -53,6 +53,7 @@ public class DropLogPanel  extends PluginPanel {
 
         JPanel controlPanel = new JPanel(new BorderLayout());
         JButton toggleButton = new JButton("Show Current Session");
+        // toggleButton.setMargin(new Insets(10, 20, 10, 20));
         toggleButton.addActionListener(e -> {
             toggleViewMode();
             if (showingAllItems) {
@@ -61,8 +62,11 @@ public class DropLogPanel  extends PluginPanel {
                 toggleButton.setText("Show All Time");
             }
         });
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.add(toggleButton, BorderLayout.CENTER);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        controlPanel.add(toggleButton, BorderLayout.CENTER);
+        controlPanel.add(buttonPanel, BorderLayout.CENTER);
 
         add(controlPanel, BorderLayout.NORTH);
 
