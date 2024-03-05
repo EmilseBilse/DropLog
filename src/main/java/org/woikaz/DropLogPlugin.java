@@ -6,10 +6,7 @@ import javax.swing.*;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.events.ItemSpawned;
-import net.runelite.api.events.MenuOptionClicked;
+import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
@@ -110,14 +107,18 @@ public class DropLogPlugin extends Plugin
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
-		if (!"Drop".equals(event.getMenuOption())) {
-			return;
+		switch (event.getMenuOption()) {
+			case "Drop":
+				String itemName = client.getItemDefinition(event.getItemId()).getName();
+				if (isItemBlacklisted(itemName, config.blackListedItems())) {
+					return;
+				}
+				pendingDrops.add(event.getItemId());
+				break;
+			case "Take":
+				log.info("YAAAY, TAKE!");
+				break;
 		}
-		String itemName = client.getItemDefinition(event.getItemId()).getName();
-		if (isItemBlacklisted(itemName, config.blackListedItems())) {
-			return;
-		}
-		pendingDrops.add(event.getItemId());
 	}
 
 	@Subscribe
@@ -147,6 +148,12 @@ public class DropLogPlugin extends Plugin
 
 			pendingDrops.remove(Integer.valueOf(item.getId()));
 		}
+	}
+
+	@Subscribe
+	public void onItemDespawned(ItemDespawned event) {
+		TileItem item = event.getItem();
+		log.info(client.getItemDefinition(item.getId()).getName());
 	}
 
 	public boolean isItemBlacklisted(String itemToCheck, String blacklistedItems) {
