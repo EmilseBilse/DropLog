@@ -25,6 +25,7 @@ import org.woikaz.ui.DropLogPanel;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @PluginDescriptor(
@@ -34,6 +35,9 @@ public class DropLogPlugin extends Plugin
 {
 	@Inject
 	private Client client;
+
+	@Inject
+	public DropLogConfig config;
 
 	@Inject
 	private ItemManager itemManager;
@@ -52,7 +56,11 @@ public class DropLogPlugin extends Plugin
 	private List<DroppedItem> initialInventory = new ArrayList<DroppedItem>();
 	private List<Integer> pendingDrops = new ArrayList<Integer>();
 
-	private boolean isPricesSet = false;
+	@Provides
+	DropLogConfig getConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(DropLogConfig.class);
+	}
 
 	@Override
 	protected void startUp() throws Exception
@@ -89,9 +97,7 @@ public class DropLogPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		if (!isPricesSet && gameStateChanged.getGameState() == GameState.LOGGING_IN) {
-			isPricesSet = true;
-			// DropDataStorage dropDataStorage = new DropDataStorage();
+		if (gameStateChanged.getGameState() == GameState.LOGGING_IN) {
 			getInjector().injectMembers(dropDataStorage);
 			List<DroppedItem> loadedItems = dropDataStorage.loadAllItems();
 			for (DroppedItem item : loadedItems) {
@@ -105,6 +111,10 @@ public class DropLogPlugin extends Plugin
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event) {
 		if (!"Drop".equals(event.getMenuOption())) {
+			return;
+		}
+		String itemName = client.getItemDefinition(event.getItemId()).getName();
+		if (isItemBlacklisted(itemName, config.blackListedItems())) {
 			return;
 		}
 		pendingDrops.add(event.getItemId());
@@ -137,5 +147,16 @@ public class DropLogPlugin extends Plugin
 
 			pendingDrops.remove(Integer.valueOf(item.getId()));
 		}
+	}
+
+	public boolean isItemBlacklisted(String itemToCheck, String blacklistedItems) {
+		String itemToCheckLower = itemToCheck.trim().toLowerCase();
+
+		List<String> blackList = Arrays.stream(blacklistedItems.split(","))
+				.map(String::trim)
+				.map(String::toLowerCase)
+				.collect(Collectors.toList());
+
+		return blackList.contains(itemToCheckLower);
 	}
 }
